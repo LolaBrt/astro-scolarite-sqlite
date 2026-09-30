@@ -8,13 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
-
   deploy:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Deploy on Ubuntu server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -32,9 +29,13 @@ jobs:
 
             cd /var/www/scolarite/astro-scolarite-sqlite
 
+            echo "Arrêt du service avant la mise à jour..."
+            sudo systemctl stop scolarite || true
+            git restore -- data/scolarite.sqlite-shm data/scolarite.sqlite-wal 2>/dev/null || true
+
             echo "Mise à jour du code..."
-            git pull origin
-            
+            git pull --ff-only origin main
+
             echo "Installation des dépendances..."
             /home/etudiant/.bun/bin/bun ci
             echo "Compilation Astro..."
